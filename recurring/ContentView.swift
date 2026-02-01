@@ -9,47 +9,51 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+
+    @State private var showingAddSubscriptionView = false
+
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var subscriptions: [Subscription]
 
     var body: some View {
         NavigationSplitView {
             List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                ForEach(subscriptions) { subscription in
+                    VStack(alignment: .leading) {
+                        Text(subscription.name)
+                            .font(.headline)
+                        Text(subscription.renewalDate.formatted(date: .abbreviated, time: .omitted))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
                     }
                 }
                 .onDelete(perform: deleteItems)
             }
+            .navigationTitle("recurring")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     EditButton()
                 }
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button {
+                        showingAddSubscriptionView.toggle()
+                    } label: {
+                        Label("add subscription", systemImage: "plus")
                     }
                 }
             }
         } detail: {
-            Text("Select an item")
+            Text("select a subscription")
         }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+        .sheet(isPresented: $showingAddSubscriptionView) {
+            NewSubscriptionView()
         }
     }
 
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(subscriptions[index])
             }
         }
     }
@@ -57,5 +61,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Subscription.self, inMemory: true)
 }
