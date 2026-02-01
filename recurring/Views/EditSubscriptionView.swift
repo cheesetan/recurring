@@ -9,9 +9,6 @@ import SwiftUI
 import SwiftData
 
 struct EditSubscriptionView: View {
-
-    @State private var priceText = "0.00"
-
     @Bindable var subscription: Subscription
 
     @Environment(\.dismiss) private var dismiss
