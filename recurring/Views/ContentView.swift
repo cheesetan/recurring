@@ -15,6 +15,8 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var subscriptions: [Subscription]
 
+    @Namespace private var namespace
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -23,13 +25,7 @@ struct ContentView: View {
                 } else {
                     List {
                         Section {
-                            VStack(alignment: .leading) {
-                                Text("total: $\(subscriptions.map({ $0.totalPricePerYear }).reduce(0, +), specifier: "%.2f")")
-                                    .font(.headline)
-                                Text("per year")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
+                            LabeledContent("total", value: subscriptions.map({ $0.totalPricePerYear }).reduce(0, +), format: .currency(code: "SGD"))
                         }
 
                         ForEach(subscriptions.sorted{ $0.name < $1.name }.sorted { $0.renewalDate < $1.renewalDate }) { subscription in
@@ -45,7 +41,7 @@ struct ContentView: View {
                                             .foregroundStyle(.secondary)
                                     }
                                     Spacer()
-                                    Text("$\(subscription.price, specifier: "%.2f")/\(subscription.occurence.short)")
+                                    Text(subscription.price, format: .currency(code: "SGD"))
                                 }
                             }
                         }
@@ -63,12 +59,14 @@ struct ContentView: View {
                         showingAddSubscriptionView.toggle()
                     } label: {
                         Label("add subscription", systemImage: "plus")
+                            .matchedTransitionSource(id: "newSubscription", in: namespace)
                     }
                 }
             }
         }
         .sheet(isPresented: $showingAddSubscriptionView) {
             NewSubscriptionView()
+                .navigationTransition(.zoom(sourceID: "newSubscription", in: namespace))
         }
     }
 

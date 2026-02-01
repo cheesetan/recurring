@@ -11,11 +11,7 @@ import SwiftData
 struct NewSubscriptionView: View {
 
     @State private var subscriptionName = ""
-
-    @State private var priceText: String = "0.00"
     @State private var subscriptionPrice: Double = 0.0
-    @FocusState private var isFocused: Bool
-
     @State private var subscriptionDate = Date()
     @State private var subscriptionOccurence: Subscription.Occurence = .monthly
 
@@ -26,24 +22,16 @@ struct NewSubscriptionView: View {
         NavigationStack {
             List {
                 Section {
-                    TextField("name", text: $subscriptionName)
-                    TextField("price", text: $priceText)
-                        .keyboardType(.decimalPad)
-                        .focused($isFocused)
-                        .onChange(of: priceText) {
-                            handleInput(priceText)
-                        }
-                        .onChange(of: isFocused) {
-                            if !isFocused {
-                                formatTo2DP()
-                            } else {
-                                if priceText == "0.00" {
-                                    priceText = ""
-                                    return
-                                }
-                            }
-                        }
+                    LabeledContent("name") {
+                        TextField("iCloud+", text: $subscriptionName)
+                            .multilineTextAlignment(.trailing)
+                    }
 
+                    LabeledContent("price") {
+                        TextField("$0.00", value: $subscriptionPrice, format: .currency(code: "SGD"))
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                    }
 
                     DatePicker("renewal date", selection: Binding(get: {
                         Calendar.current.startOfDay(for: subscriptionDate)
@@ -59,7 +47,7 @@ struct NewSubscriptionView: View {
                     }
                 }
             }
-            .scrollDismissesKeyboard(.interactively)
+            .scrollDismissesKeyboard(.immediately)
             .navigationTitle("new subscription")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -82,31 +70,6 @@ struct NewSubscriptionView: View {
             }
         }
     }
-
-    private func handleInput(_ input: String) {
-        var filtered = input.filter { "0123456789.".contains($0) }
-
-        let decimalCount = filtered.filter { $0 == "." }.count
-        if decimalCount > 1 {
-            filtered.removeLast()
-        }
-
-        if let dotIndex = filtered.firstIndex(of: ".") {
-            let decimals = filtered.distance(from: dotIndex, to: filtered.endIndex) - 1
-            if decimals > 2 {
-                filtered.removeLast()
-            }
-        }
-
-        priceText = filtered
-        subscriptionPrice = Double(filtered) ?? 0.0
-    }
-
-    private func formatTo2DP() {
-        subscriptionPrice = Double(priceText) ?? 0.0
-        priceText = String(format: "%.2f", subscriptionPrice)
-    }
-
 }
 
 #Preview {
