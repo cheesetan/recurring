@@ -43,8 +43,24 @@ final class Subscription {
         return next
     }
 
+    var totalPricePerYear: Double {
+        switch occurence {
+        case .weekly: price * 52
+        case .monthly: price * 12
+        case .yearly: price
+        }
+    }
+
     enum Occurence: String, Codable, CaseIterable {
         case weekly, monthly, yearly
+
+        var short: String {
+            switch self {
+            case .weekly: "wk"
+            case .monthly: "mo"
+            case .yearly: "yr"
+            }
+        }
     }
 
     init(name: String, startDate: Date, occurence: Occurence, price: Double) {

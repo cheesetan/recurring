@@ -16,18 +16,42 @@ struct ContentView: View {
     @Query private var subscriptions: [Subscription]
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(subscriptions) { subscription in
-                    VStack(alignment: .leading) {
-                        Text(subscription.name)
-                            .font(.headline)
-                        Text(subscription.renewalDate.formatted(date: .abbreviated, time: .omitted))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+        NavigationStack {
+            VStack {
+                if subscriptions.isEmpty {
+                    ContentUnavailableView("no subscriptions", systemImage: "singaporedollarsign.arrow.trianglehead.counterclockwise.rotate.90", description: Text("you have no active subscriptions. add one to get started."))
+                } else {
+                    List {
+                        Section {
+                            VStack(alignment: .leading) {
+                                Text("total: $\(subscriptions.map({ $0.totalPricePerYear }).reduce(0, +), specifier: "%.2f")")
+                                    .font(.headline)
+                                Text("per year")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+
+                        ForEach(subscriptions.sorted{ $0.name < $1.name }.sorted { $0.renewalDate < $1.renewalDate }) { subscription in
+                            NavigationLink {
+                                EditSubscriptionView(subscription: subscription)
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(subscription.name)
+                                            .font(.headline)
+                                        Text(subscription.renewalDate.formatted(date: .abbreviated, time: .omitted))
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Text("$\(subscription.price, specifier: "%.2f")/\(subscription.occurence.short)")
+                                }
+                            }
+                        }
+                        .onDelete(perform: deleteItems)
                     }
                 }
-                .onDelete(perform: deleteItems)
             }
             .navigationTitle("recurring")
             .toolbar {
@@ -42,8 +66,6 @@ struct ContentView: View {
                     }
                 }
             }
-        } detail: {
-            Text("select a subscription")
         }
         .sheet(isPresented: $showingAddSubscriptionView) {
             NewSubscriptionView()

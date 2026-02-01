@@ -1,5 +1,5 @@
 //
-//  NewSubscriptionView.swift
+//  EditSubscriptionView.swift
 //  recurring
 //
 //  Created by Tristan Chay on 2/2/26.
@@ -8,25 +8,20 @@
 import SwiftUI
 import SwiftData
 
-struct NewSubscriptionView: View {
+struct EditSubscriptionView: View {
 
-    @State private var subscriptionName = ""
-
-    @State private var priceText: String = "0.00"
-    @State private var subscriptionPrice: Double = 0.0
+    @State private var priceText = "0.00"
     @FocusState private var isFocused: Bool
 
-    @State private var subscriptionDate = Date()
-    @State private var subscriptionOccurence: Subscription.Occurence = .monthly
+    @Bindable var subscription: Subscription
 
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         NavigationStack {
             List {
                 Section {
-                    TextField("name", text: $subscriptionName)
+                    TextField("name", text: $subscription.name)
                     TextField("price", text: $priceText)
                         .keyboardType(.decimalPad)
                         .focused($isFocused)
@@ -43,15 +38,19 @@ struct NewSubscriptionView: View {
                                 }
                             }
                         }
+                        .onAppear {
+                            priceText = "\(subscription.price)"
+                            formatTo2DP()
+                        }
 
 
                     DatePicker("renewal date", selection: Binding(get: {
-                        Calendar.current.startOfDay(for: subscriptionDate)
+                        Calendar.current.startOfDay(for: subscription.startDate)
                     }, set: { value in
-                        subscriptionDate = Calendar.current.startOfDay(for: value)
+                        subscription.startDate = Calendar.current.startOfDay(for: value)
                     }), displayedComponents: .date)
 
-                    Picker("occurence", selection: $subscriptionOccurence) {
+                    Picker("occurence", selection: $subscription.occurence) {
                         ForEach(Subscription.Occurence.allCases, id: \.hashValue) { occurence in
                             Text(occurence.rawValue)
                                 .tag(occurence)
@@ -61,25 +60,6 @@ struct NewSubscriptionView: View {
             }
             .scrollDismissesKeyboard(.interactively)
             .navigationTitle("new subscription")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        modelContext.insert(
-                            Subscription(
-                                name: subscriptionName,
-                                startDate: subscriptionDate,
-                                occurence: subscriptionOccurence,
-                                price: subscriptionPrice
-                            )
-                        )
-                        dismiss()
-                    } label: {
-                        Label("add subscription", systemImage: "checkmark")
-                    }
-                    .buttonStyle(.glassProminent)
-                    .disabled(subscriptionName.isEmpty || subscriptionPrice == 0.0)
-                }
-            }
         }
     }
 
@@ -99,12 +79,12 @@ struct NewSubscriptionView: View {
         }
 
         priceText = filtered
-        subscriptionPrice = Double(filtered) ?? 0.0
+        subscription.price = Double(filtered) ?? 0.0
     }
 
     private func formatTo2DP() {
-        subscriptionPrice = Double(priceText) ?? 0.0
-        priceText = String(format: "%.2f", subscriptionPrice)
+        subscription.price = Double(priceText) ?? 0.0
+        priceText = String(format: "%.2f", subscription.price)
     }
 
 }
