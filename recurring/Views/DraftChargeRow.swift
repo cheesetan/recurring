@@ -11,36 +11,44 @@ struct DraftChargeRow: View {
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(draft.date.formatted(date: .abbreviated, time: .omitted))
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(draft.date.formatted(date: .abbreviated, time: .omitted))
+                .font(AppTypography.figureLabel())
+                .lineLimit(1)
+                .layoutPriority(1)
+
+            Spacer(minLength: 8)
+
+            TextField(
+                "0",
+                value: $draft.sgdAmount,
+                format: .currency(code: "SGD")
+            )
+            .textFieldStyle(.plain)
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(.trailing)
+            .font(.moneyCaption())
+            .foregroundStyle(AppTheme.accent)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: 120)
+            .accessibilityLabel("SGD charged")
+
+            Button(action: confirm) {
+                Text("confirm")
                     .font(AppTypography.figureLabel())
-                Text("draft")
-                    .font(AppTypography.meta())
-                    .foregroundStyle(AppTheme.inkSecondary)
-            }
-
-            Spacer()
-
-            TextField("amount", value: $draft.sgdAmount, format: .number)
-                .keyboardType(.decimalPad)
-                .multilineTextAlignment(.trailing)
-                .font(.moneyCaption())
-                .frame(maxWidth: 100)
-
-            Button {
-                draft.isConfirmed = true
-                try? modelContext.save()
-                WidgetRefresh.now()
-            } label: {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.title2)
-                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(AppTheme.accent)
             }
             .buttonStyle(.plain)
-            .tint(.green)
-            .accessibilityLabel("confirm")
+            .fixedSize()
         }
-        .padding(.vertical, 10)
+    }
+
+    private func confirm() {
+        withAnimation(.snappy) {
+            draft.isConfirmed = true
+        }
+        try? modelContext.save()
+        WidgetRefresh.now()
     }
 }

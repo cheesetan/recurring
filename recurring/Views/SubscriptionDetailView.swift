@@ -34,7 +34,7 @@ struct SubscriptionDetailView: View {
         List {
             Section {
                 hero
-                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 12, trailing: 0))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 12, trailing: 0))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             }
@@ -97,11 +97,12 @@ struct SubscriptionDetailView: View {
                         .listRowBackground(AppTheme.card)
                     }
                 } header: {
-                    sectionHeader("charges")
+                    sectionHeader("history")
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .contentMargins(.top, 0, for: .scrollContent)
         .scrollContentBackground(.hidden)
         .scrollIndicators(.hidden)
         .screenCanvas()
@@ -454,16 +455,21 @@ private struct SubscriptionFactSheet: View {
                 }
             }
         }
-        .presentationDetents([.height(FittedSheet.height(content: contentHeight, chrome: chromeHeight))])
+        .fittedSheetDetents(content: contentHeight, chrome: chromeHeight)
         .onAppear {
             appeared = true
             if fact.focusesField {
                 focusedField = .primary
             }
         }
+        .onChange(of: draft) { _, _ in
+            apply()
+        }
         .onDisappear {
-            guard appeared else { return }
-            commit()
+            guard appeared, !didCommit else { return }
+            didCommit = true
+            apply()
+            onCommit()
         }
     }
 
@@ -563,6 +569,40 @@ private struct SubscriptionFactSheet: View {
         .padding(.horizontal, -16)
     }
 
+    private var draft: Draft {
+        Draft(
+            name: name,
+            state: state,
+            use: use,
+            renewalDate: renewalDate,
+            cadenceKind: cadenceKind,
+            cadenceInterval: cadenceInterval,
+            sgdAmount: sgdAmount,
+            billedAmountText: billedAmountText,
+            billedCurrency: billedCurrency,
+            leadTimeDays: leadTimeDays,
+            note: note,
+            paymentNickname: paymentNickname,
+            paidThrough: paidThrough
+        )
+    }
+
+    private struct Draft: Equatable {
+        var name: String
+        var state: SubscriptionState
+        var use: SubscriptionUse
+        var renewalDate: Date
+        var cadenceKind: CadenceKind
+        var cadenceInterval: Int
+        var sgdAmount: Decimal
+        var billedAmountText: String
+        var billedCurrency: String
+        var leadTimeDays: Int
+        var note: String
+        var paymentNickname: String
+        var paidThrough: Date
+    }
+
     private func leadTimeText(_ days: Int) -> String {
         switch days {
         case 0: "same day"
@@ -571,9 +611,7 @@ private struct SubscriptionFactSheet: View {
         }
     }
 
-    private func commit() {
-        guard !didCommit else { return }
-        didCommit = true
+    private func apply() {
         let calendar = Calendar.current
         switch fact {
         case .name:
@@ -615,12 +653,128 @@ private struct SubscriptionFactSheet: View {
         case .note:
             subscription.note = trimmedOrNil(note)
         }
-        onCommit()
     }
 
     private func trimmedOrNil(_ value: String) -> String? {
         let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? nil : trimmed
+    }
+}
+
+extension View {
+    func fittedSheetDetents(content: CGFloat, chrome: CGFloat) -> some View {
+        modifier(FittedSheetDetents(contentHeight: content, chromeHeight: chrome))
+    }
+}
+
+/// One shared height for the fitted detent. Only one of these sheets is presented at a time.
+private final class FittedDetentBox {
+    static let shared = FittedDetentBox()
+    var height: CGFloat = 200
+}
+
+/// Stable detent identity. Changing `.height` builds a new detent and the sheet snaps;
+/// this type stays put, and UIKit animates when its resolved height is invalidated.
+private struct FittedDetent: CustomPresentationDetent {
+    static func height(in context: Context) -> CGFloat? {
+        min(max(FittedDetentBox.shared.height, 1), context.maxDetentValue)
+    }
+}
+
+/// Keeps an exact-height sheet on a stable custom detent and animates when that height changes.
+private struct FittedSheetDetents: ViewModifier {
+    var contentHeight: CGFloat
+    var chromeHeight: CGFloat
+
+    private var resolved: CGFloat {
+        FittedSheet.height(content: contentHeight, chrome: chromeHeight)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .presentationDetents([.custom(FittedDetent.self)])
+            .presentationDragIndicator(.hidden)
+            .background {
+                FittedSheetResizer(height: resolved)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+    }
+}
+
+private struct FittedSheetResizer: UIViewRepresentable {
+    var height: CGFloat
+
+    func makeUIView(context: Context) -> FittedSheetResizerView {
+        FittedSheetResizerView()
+    }
+
+    func updateUIView(_ view: FittedSheetResizerView, context: Context) {
+        view.setHeight(height)
+    }
+}
+
+private final class FittedSheetResizerView: UIView {
+    private var target: CGFloat = 0
+    private var applied: CGFloat = -1
+    private var applying = false
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isUserInteractionEnabled = false
+        backgroundColor = .clear
+    }
+
+    required init?(coder: NSCoder) {
+        nil
+    }
+
+    func setHeight(_ height: CGFloat) {
+        guard height > 1, abs(target - height) > 0.5 else { return }
+        target = height
+        FittedDetentBox.shared.height = height
+        apply()
+    }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard target > 1 else { return }
+        FittedDetentBox.shared.height = target
+        apply()
+    }
+
+    private func apply() {
+        guard !applying, target > 1, window != nil, let sheet else { return }
+        applying = true
+        defer { applying = false }
+        let changed = abs(applied - target) > 0.5
+        let first = applied < 0
+        applied = target
+        guard changed else { return }
+        if first {
+            UIView.performWithoutAnimation {
+                sheet.invalidateDetents()
+            }
+        } else {
+            sheet.animateChanges {
+                sheet.invalidateDetents()
+            }
+        }
+    }
+
+    private var sheet: UISheetPresentationController? {
+        var responder: UIResponder? = self
+        while let current = responder {
+            if let controller = current as? UIViewController {
+                if let sheet = controller.sheetPresentationController
+                    ?? controller.navigationController?.sheetPresentationController
+                    ?? controller.parent?.sheetPresentationController {
+                    return sheet
+                }
+            }
+            responder = current.next
+        }
+        return nil
     }
 }
 
@@ -633,15 +787,11 @@ enum FittedSheet {
 
     static func assign(_ height: Binding<CGFloat>, to newValue: CGFloat) {
         guard newValue > 0, abs(height.wrappedValue - newValue) > 0.5 else { return }
-        guard height.wrappedValue != 0 else {
-            var transaction = Transaction()
-            transaction.disablesAnimations = true
-            withTransaction(transaction) {
-                height.wrappedValue = newValue
-            }
-            return
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            height.wrappedValue = newValue
         }
-        height.wrappedValue = newValue
     }
 
     private static var maximumHeight: CGFloat {

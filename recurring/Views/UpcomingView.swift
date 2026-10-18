@@ -16,7 +16,7 @@ private enum ListVisibility: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .active: "active & trial"
-        case .all: "all"
+        case .all: "active, trial & cancelled"
         }
     }
 
@@ -121,6 +121,7 @@ struct UpcomingView: View {
         .scrollIndicators(.hidden)
         .screenCanvas()
         .navigationTitle("recurring")
+        .navigationSubtitle("\(useFilter.label) • \(visibility.title)")
         .navigationDestination(isPresented: $showingCharts) {
             ChartsView(useFilter: $useFilter)
         }

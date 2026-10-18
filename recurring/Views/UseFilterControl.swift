@@ -9,25 +9,27 @@ struct UseFilterControl: View {
     @Binding var filter: UseFilter
 
     var body: some View {
-        HStack(spacing: 8) {
-            ForEach(UseFilter.allCases) { option in
-                Button {
-                    withAnimation(.snappy) {
-                        filter = option
-                    }
-                } label: {
-                    Text(option.label)
-                        .font(AppTypography.figureLabel())
-                        .padding(.horizontal, 14)
-                        .frame(minHeight: 44)
-                        .background(
-                            filter == option ? AppTheme.accent : AppTheme.card,
-                            in: Capsule()
-                        )
-                        .foregroundStyle(filter == option ? Color.white : Color.primary)
+        GlassEffectContainer {
+            HStack {
+                ForEach(UseFilter.allCases) { option in
+                    filterButton(option)
                 }
-                .buttonStyle(.plain)
             }
         }
+    }
+
+    private func filterButton(_ option: UseFilter) -> some View {
+        let isSelected = filter == option
+        return Button {
+            withAnimation(.smooth) {
+                filter = option
+            }
+        } label: {
+            Text(option.label)
+                .font(AppTypography.figureLabel())
+                .padding(4)
+                .foregroundStyle(isSelected ? Color.white : Color.primary)
+        }
+        .buttonStyle(.glass(isSelected ? .regular.tint(AppTheme.accent).interactive() : .regular.interactive()))
     }
 }

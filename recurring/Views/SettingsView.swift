@@ -55,6 +55,6 @@ struct SettingsView: View {
                 }
             }
         }
-        .presentationDetents([.height(FittedSheet.height(content: contentHeight, chrome: chromeHeight))])
+        .fittedSheetDetents(content: contentHeight, chrome: chromeHeight)
     }
 }
