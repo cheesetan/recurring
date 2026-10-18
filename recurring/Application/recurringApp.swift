@@ -27,6 +27,8 @@ struct recurringApp: App {
         WindowGroup {
             RootTabView()
                 .fontDesign(.rounded)
+                .tint(AppTheme.accent)
+                .scrollEdgeEffectStyle(.soft, for: .top)
                 .task {
                     await NotificationScheduler.requestAuthorizationIfNeeded()
                 }

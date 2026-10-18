@@ -12,6 +12,6 @@ struct RootTabView: View {
         NavigationStack {
             UpcomingView(useFilter: $useFilter)
         }
-        .tint(.accentColor)
+        .tint(AppTheme.accent)
     }
 }

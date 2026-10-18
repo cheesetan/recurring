@@ -101,7 +101,7 @@ struct ScreenCanvasBackground: View {
                 endPoint: .bottom
             )
             RadialGradient(
-                colors: [Color.accentColor.opacity(0.16), Color.accentColor.opacity(0.02), .clear],
+                colors: [AppTheme.accent.opacity(0.16), AppTheme.accent.opacity(0.02), .clear],
                 center: UnitPoint(x: 0.85, y: 0.02),
                 startRadius: 10,
                 endRadius: 420
@@ -116,6 +116,7 @@ struct CardModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding(padding)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .background(AppTheme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
     }

@@ -39,6 +39,7 @@ struct DraftChargesView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .scrollIndicators(.hidden)
             }
         }
         .screenCanvas()

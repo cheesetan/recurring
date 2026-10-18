@@ -7,6 +7,27 @@ import Charts
 import SwiftData
 import SwiftUI
 
+private enum ListVisibility: String, CaseIterable, Identifiable {
+    case active
+    case all
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .active: "active & trial"
+        case .all: "all"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .active: "line.3.horizontal.decrease.circle"
+        case .all: "line.3.horizontal.decrease.circle.fill"
+        }
+    }
+}
+
 private enum RenewalBucket: CaseIterable, Identifiable {
     case thisWeek
     case thisMonth
@@ -30,9 +51,10 @@ struct UpcomingView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Subscription.renewalDate) private var subscriptions: [Subscription]
 
-    @State private var showCancelled = false
+    @State private var visibility: ListVisibility = .active
     @State private var showingAdd = false
     @State private var showingSettings = false
+    @State private var showingCharts = false
 
     private var snapshots: [SubscriptionSnapshot] {
         SubscriptionQueryHelpers.allSnapshots(subscriptions)
@@ -45,34 +67,21 @@ struct UpcomingView: View {
     var body: some View {
         List {
             Section {
-                VStack(alignment: .leading, spacing: 16) {
-                    UseFilterControl(filter: $useFilter)
-                    figuresHero
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 16) {
+                        UseFilterControl(filter: $useFilter)
+                        figuresHero
+                    }
+                    Button {
+                        showingCharts = true
+                    } label: {
+                        cashPreview
+                    }
+                    .buttonStyle(.plain)
                 }
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
+                .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
-            }
-
-            Section {
-                NavigationLink {
-                    ChartsView(useFilter: $useFilter)
-                } label: {
-                    cashPreview
-                }
-                .buttonStyle(.plain)
-                .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
-            }
-
-            Section {
-                Toggle("show cancelled", isOn: $showCancelled)
-                    .font(AppTypography.figureLabel())
-                    .tint(.accentColor)
-                    .listRowInsets(EdgeInsets(top: 4, leading: 20, bottom: 4, trailing: 20))
-                    .listRowBackground(AppTheme.card)
-                    .listRowSeparator(.hidden)
             }
 
             if visibleBuckets.isEmpty {
@@ -88,7 +97,7 @@ struct UpcomingView: View {
                         let items = subscriptions(in: bucket)
                         ForEach(items) { sub in
                             NavigationLink {
-                                SubscriptionFormView(subscription: sub)
+                                SubscriptionDetailView(subscription: sub)
                             } label: {
                                 SubscriptionRowView(subscription: sub)
                             }
@@ -109,21 +118,39 @@ struct UpcomingView: View {
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
+        .scrollIndicators(.hidden)
         .screenCanvas()
         .navigationTitle("recurring")
+        .navigationDestination(isPresented: $showingCharts) {
+            ChartsView(useFilter: $useFilter)
+        }
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    showingSettings = true
+                } label: {
+                    Image(systemName: "gearshape")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Picker("visibility", selection: $visibility) {
+                        ForEach(ListVisibility.allCases) { option in
+                            Text(option.title).tag(option)
+                        }
+                    }
+                    .pickerStyle(.inline)
+                } label: {
+                    Image(systemName: visibility.symbol)
+                }
+                .accessibilityLabel(visibility.title)
+            }
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     showingAdd = true
                 } label: {
                     Image(systemName: "plus")
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingSettings = true
-                } label: {
-                    Image(systemName: "gearshape")
                 }
             }
         }
@@ -132,7 +159,6 @@ struct UpcomingView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView()
-                .presentationDetents([.medium])
         }
     }
 
@@ -143,7 +169,7 @@ struct UpcomingView: View {
                 .foregroundStyle(AppTheme.inkSecondary)
             Text(SpendEngine.runRate(subscriptions: snapshots, useFilter: useFilter), format: .currency(code: "SGD"))
                 .font(.moneyHero())
-                .foregroundStyle(Color.accentColor)
+                .foregroundStyle(AppTheme.accent)
                 .contentTransition(.numericText())
 
             HStack(spacing: 12) {
@@ -162,25 +188,32 @@ struct UpcomingView: View {
 
     private var cashPreview: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("cash")
-                    .font(AppTypography.sectionTitle())
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("cash")
+                        .font(AppTypography.sectionTitle())
+                    Text("more charts")
+                        .font(AppTypography.meta())
+                        .foregroundStyle(AppTheme.inkSecondary)
+                }
                 Spacer()
                 Text(previewCashTotal, format: .currency(code: "SGD"))
                     .font(.moneyCaption())
-                    .foregroundStyle(Color.accentColor)
+                    .foregroundStyle(AppTheme.accent)
+                    .contentTransition(.numericText())
             }
             Chart(previewCash, id: \.monthStart) { item in
                 BarMark(
                     x: .value("month", item.monthStart, unit: .month),
                     y: .value("SGD", NSDecimalNumber(decimal: item.total).doubleValue)
                 )
-                .foregroundStyle(Color.accentColor.gradient)
+                .foregroundStyle(AppTheme.accent.gradient)
                 .cornerRadius(4)
             }
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
             .frame(height: 88)
+            .animation(.smooth, value: useFilter)
         }
         .appCard()
     }
@@ -192,6 +225,7 @@ struct UpcomingView: View {
                 .foregroundStyle(AppTheme.inkSecondary)
             Text(value, format: .currency(code: "SGD"))
                 .font(.moneyCaption())
+                .contentTransition(.numericText())
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -231,7 +265,7 @@ struct UpcomingView: View {
     private func subscriptions(in bucket: RenewalBucket) -> [Subscription] {
         switch bucket {
         case .cancelled:
-            guard showCancelled else { return [] }
+            guard visibility == .all else { return [] }
             return subscriptions
                 .filter { $0.state == .cancelled && useFilter.matches($0.use) }
                 .sorted { $0.renewalDate < $1.renewalDate }

@@ -280,7 +280,7 @@ private struct RenewalsWidgetView: View {
     let entry: RenewalsEntry
 
     var body: some View {
-        VStack(alignment: .leading, spacing: family == .systemSmall ? 6 : 8) {
+        VStack(alignment: .leading, spacing: family == .systemLarge || family == .systemExtraLarge ? 8 : 6) {
             Text("renewals")
                 .font(.system(.caption, design: .rounded).weight(.semibold))
                 .foregroundStyle(WidgetTheme.inkSecondary)
@@ -307,28 +307,57 @@ private struct RenewalsWidgetView: View {
                     .foregroundStyle(WidgetTheme.accent)
             }
         }
+        .padding(.vertical, family == .systemMedium ? 16 : 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
 
     private func renewalColumn(_ items: [WidgetRenewal]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: family == .systemMedium ? 8 : 6) {
             ForEach(items) { item in
-                HStack {
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(item.name)
-                            .font(.system(.subheadline, design: .rounded).weight(.medium))
-                            .lineLimit(1)
-                        if family != .systemSmall {
-                            Text(item.date.formatted(date: .abbreviated, time: .omitted))
-                                .font(.system(.caption2, design: .rounded))
-                                .foregroundStyle(WidgetTheme.inkSecondary)
-                        }
-                    }
-                    Spacer(minLength: 4)
-                    Text(item.amount, format: .currency(code: "SGD"))
-                        .font(.system(.caption, design: .rounded).weight(.semibold))
-                        .foregroundStyle(WidgetTheme.accent)
+                if family == .systemMedium {
+                    mediumRenewalRow(item)
+                } else {
+                    renewalRow(item)
                 }
             }
+        }
+    }
+
+    /// One line per renewal so the medium widget can keep its vertical inset.
+    private func mediumRenewalRow(_ item: WidgetRenewal) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Text(item.name)
+                .font(.system(.subheadline, design: .rounded).weight(.medium))
+                .lineLimit(1)
+            Text(item.date.formatted(date: .abbreviated, time: .omitted))
+                .font(.system(.caption2, design: .rounded))
+                .foregroundStyle(WidgetTheme.inkSecondary)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+            Spacer(minLength: 8)
+            Text(item.amount, format: .currency(code: "SGD"))
+                .font(.system(.caption, design: .rounded).weight(.semibold))
+                .foregroundStyle(WidgetTheme.accent)
+                .fixedSize(horizontal: true, vertical: false)
+        }
+    }
+
+    private func renewalRow(_ item: WidgetRenewal) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 1) {
+                Text(item.name)
+                    .font(.system(.subheadline, design: .rounded).weight(.medium))
+                    .lineLimit(1)
+                if family != .systemSmall {
+                    Text(item.date.formatted(date: .abbreviated, time: .omitted))
+                        .font(.system(.caption2, design: .rounded))
+                        .foregroundStyle(WidgetTheme.inkSecondary)
+                }
+            }
+            Spacer(minLength: 4)
+            Text(item.amount, format: .currency(code: "SGD"))
+                .font(.system(.caption, design: .rounded).weight(.semibold))
+                .foregroundStyle(WidgetTheme.accent)
         }
     }
 }
@@ -383,22 +412,31 @@ private struct CashWidgetView: View {
                 .foregroundStyle(WidgetTheme.accent)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
-            if family != .systemSmall {
-                Chart(entry.months) { month in
-                    BarMark(
-                        x: .value("month", month.monthStart, unit: .month),
-                        y: .value("SGD", NSDecimalNumber(decimal: month.total).doubleValue)
-                    )
-                    .foregroundStyle(WidgetTheme.accent.gradient)
-                    .cornerRadius(3)
-                }
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
-                .frame(height: family == .systemMedium ? 72 : 120)
+            if family == .systemLarge || family == .systemExtraLarge {
+                Spacer(minLength: 0)
+                cashChart
+            } else if family != .systemSmall {
+                cashChart
+                Spacer(minLength: 0)
+            } else {
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+    }
+
+    private var cashChart: some View {
+        Chart(entry.months) { month in
+            BarMark(
+                x: .value("month", month.monthStart, unit: .month),
+                y: .value("SGD", NSDecimalNumber(decimal: month.total).doubleValue)
+            )
+            .foregroundStyle(WidgetTheme.accent.gradient)
+            .cornerRadius(3)
+        }
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden)
+        .frame(height: family == .systemMedium ? 72 : 120)
     }
 }
 

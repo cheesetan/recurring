@@ -7,7 +7,6 @@ import SwiftData
 import SwiftUI
 
 struct SubscriptionFormView: View {
-    var subscription: Subscription?
     var showsCancel: Bool = false
 
     @Environment(\.dismiss) private var dismiss
@@ -27,15 +26,9 @@ struct SubscriptionFormView: View {
     @State private var chargesBeganDate: Date?
     @State private var paidThrough: Date?
 
-    private var isEditing: Bool { subscription != nil }
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                if !isEditing {
-                    presetChipsView
-                }
-
                 formCard("subscription") {
                     labeledField("name") {
                         TextField("name", text: $name)
@@ -75,10 +68,10 @@ struct SubscriptionFormView: View {
                             .font(AppTypography.rowTitle())
                     }
                     labeledField("billed amount") {
-                        TextField("0", value: Binding(
+                        TextField("0.00", value: Binding(
                             get: { billedAmount ?? sgdAmount },
                             set: { billedAmount = $0 }
-                        ), format: .number)
+                        ), format: .number.precision(.fractionLength(2...2)))
                         .keyboardType(.decimalPad)
                         .font(AppTypography.rowTitle())
                     }
@@ -102,60 +95,30 @@ struct SubscriptionFormView: View {
                     }
                 }
 
-                if !isEditing {
-                    formCard("history") {
-                        Toggle("backfill past charges", isOn: Binding(
-                            get: { chargesBeganDate != nil },
-                            set: { on in
-                                chargesBeganDate = on ? Calendar.current.date(byAdding: .year, value: -1, to: Date()) : nil
-                            }
-                        ))
+                formCard("history") {
+                    Toggle("backfill past charges", isOn: Binding(
+                        get: { chargesBeganDate != nil },
+                        set: { on in
+                            chargesBeganDate = on ? Calendar.current.date(byAdding: .year, value: -1, to: Date()) : nil
+                        }
+                    ))
+                    .font(AppTypography.figureLabel())
+                    .tint(AppTheme.accent)
+                    if chargesBeganDate != nil {
+                        DatePicker("charges began", selection: Binding(
+                            get: { chargesBeganDate ?? Date() },
+                            set: { chargesBeganDate = Calendar.current.startOfDay(for: $0) }
+                        ), displayedComponents: .date)
                         .font(AppTypography.figureLabel())
-                        .tint(.accentColor)
-                        if chargesBeganDate != nil {
-                            DatePicker("charges began", selection: Binding(
-                                get: { chargesBeganDate ?? Date() },
-                                set: { chargesBeganDate = Calendar.current.startOfDay(for: $0) }
-                            ), displayedComponents: .date)
-                            .font(AppTypography.figureLabel())
-                        }
-                    }
-                }
-
-                if isEditing, let subscription {
-                    formCard("charges") {
-                        NavigationLink {
-                            DraftChargesView(subscription: subscription)
-                        } label: {
-                            HStack {
-                                Text("review drafts")
-                                    .font(AppTypography.rowTitle())
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(AppTypography.meta())
-                                    .foregroundStyle(AppTheme.inkSecondary)
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        let confirmed = Array((subscription.charges ?? []).filter(\.isConfirmed).sorted { $0.date > $1.date }.prefix(6))
-                        ForEach(confirmed) { charge in
-                            HStack {
-                                Text(charge.date.formatted(date: .abbreviated, time: .omitted))
-                                    .font(AppTypography.meta())
-                                    .foregroundStyle(AppTheme.inkSecondary)
-                                Spacer()
-                                Text(charge.sgdAmount, format: .currency(code: "SGD"))
-                                    .font(.moneyCaption())
-                            }
-                        }
                     }
                 }
             }
             .padding(16)
         }
+        .scrollIndicators(.hidden)
         .scrollDismissesKeyboard(.interactively)
         .screenCanvas()
-        .navigationTitle(isEditing ? "edit" : "new subscription")
+        .navigationTitle("new subscription")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if showsCancel {
@@ -166,10 +129,13 @@ struct SubscriptionFormView: View {
             ToolbarItem(placement: .confirmationAction) {
                 Button("save") { save() }
                     .fontWeight(.semibold)
-                    .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .disabled(!canSave)
             }
         }
-        .onAppear(perform: load)
+    }
+
+    private var canSave: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty && sgdAmount > 0
     }
 
     private func formCard<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
@@ -199,7 +165,7 @@ struct SubscriptionFormView: View {
         selection: Binding<Option>,
         label: @escaping (Option) -> String
     ) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 8) {
                 ForEach(options) { option in
                     Button {
@@ -210,7 +176,7 @@ struct SubscriptionFormView: View {
                             .padding(.horizontal, 14)
                             .frame(minHeight: 44)
                             .background(
-                                selection.wrappedValue == option ? Color.accentColor : AppTheme.canvasTop,
+                                selection.wrappedValue == option ? AppTheme.accent : AppTheme.canvasTop,
                                 in: Capsule()
                             )
                             .foregroundStyle(selection.wrappedValue == option ? Color.white : Color.primary)
@@ -218,99 +184,34 @@ struct SubscriptionFormView: View {
                     .buttonStyle(.plain)
                 }
             }
+            .padding(.horizontal, 16)
         }
-    }
-
-    private var presetChipsView: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                ForEach(SubscriptionPresets.all) { preset in
-                    Button {
-                        applyPreset(preset)
-                    } label: {
-                        Text(preset.name)
-                            .font(AppTypography.figureLabel())
-                            .padding(.horizontal, 14)
-                            .frame(minHeight: 44)
-                            .background(
-                                name == preset.name ? Color.accentColor.opacity(0.18) : AppTheme.card,
-                                in: Capsule()
-                            )
-                            .overlay(
-                                Capsule().strokeBorder(
-                                    name == preset.name ? Color.accentColor : Color.clear,
-                                    lineWidth: 1.5
-                                )
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-        }
-    }
-
-    private func applyPreset(_ preset: SubscriptionPreset) {
-        name = preset.name
-        cadenceKind = preset.cadence.kind
-        cadenceInterval = preset.cadence.interval
-        if let code = preset.billedCurrencyCode {
-            billedCurrencyCode = code
-        }
-    }
-
-    private func load() {
-        guard let subscription else { return }
-        name = subscription.name
-        state = subscription.state
-        use = subscription.use
-        renewalDate = subscription.renewalDate
-        cadenceKind = subscription.cadence.kind
-        cadenceInterval = subscription.cadence.interval
-        sgdAmount = subscription.sgdAmount
-        billedAmount = subscription.billedAmount
-        billedCurrencyCode = subscription.billedCurrencyCode ?? "SGD"
-        leadTimeDays = subscription.leadTimeDays
-        note = subscription.note ?? ""
-        paymentNickname = subscription.paymentNickname ?? ""
-        paidThrough = subscription.paidThrough
+        .scrollIndicators(.hidden)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, -16)
     }
 
     private func save() {
         let cadence = Cadence(kind: cadenceKind, interval: cadenceInterval)
         let calendar = Calendar.current
-        let sub: Subscription
-        if let subscription {
-            sub = subscription
-        } else {
-            sub = Subscription(
-                name: name,
-                state: state,
-                use: use,
-                renewalDate: calendar.startOfDay(for: renewalDate),
-                cadence: cadence,
-                sgdAmount: sgdAmount,
-                billedAmount: billedAmount,
-                billedCurrencyCode: billedCurrencyCode,
-                leadTimeDays: leadTimeDays
-            )
-            modelContext.insert(sub)
-        }
-
-        sub.name = name
-        sub.state = state
-        sub.use = use
-        sub.renewalDate = calendar.startOfDay(for: renewalDate)
-        sub.cadence = cadence
-        sub.sgdAmount = sgdAmount
-        sub.billedAmount = billedAmount
-        sub.billedCurrencyCode = billedCurrencyCode
-        sub.leadTimeDays = leadTimeDays
+        let sub = Subscription(
+            name: name,
+            state: state,
+            use: use,
+            renewalDate: calendar.startOfDay(for: renewalDate),
+            cadence: cadence,
+            sgdAmount: sgdAmount,
+            billedAmount: billedAmount,
+            billedCurrencyCode: billedCurrencyCode,
+            leadTimeDays: leadTimeDays
+        )
+        modelContext.insert(sub)
         sub.note = note.isEmpty ? nil : note
         sub.paymentNickname = paymentNickname.isEmpty ? nil : paymentNickname
         sub.paidThrough = state == .cancelled ? calendar.startOfDay(for: paidThrough ?? renewalDate) : nil
 
-        if !isEditing, chargesBeganDate != nil {
-            sub.chargesBeganDate = calendar.startOfDay(for: chargesBeganDate!)
+        if let chargesBeganDate {
+            sub.chargesBeganDate = calendar.startOfDay(for: chargesBeganDate)
             try? ChargeRecorder.createDraftBackfill(for: sub, context: modelContext)
         }
 
@@ -324,7 +225,7 @@ struct SubscriptionFormView: View {
 struct NewSubscriptionSheet: View {
     var body: some View {
         NavigationStack {
-            SubscriptionFormView(subscription: nil, showsCancel: true)
+            SubscriptionFormView(showsCancel: true)
         }
     }
 }

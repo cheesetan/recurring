@@ -40,19 +40,21 @@ struct ChartsView: View {
 
                 HStack(spacing: 8) {
                     ForEach(CashRange.allCases) { range in
-                        Button {
+                    Button {
+                        withAnimation(.snappy) {
                             cashRange = range
-                        } label: {
-                            Text(range.label)
-                                .font(AppTypography.meta())
-                                .padding(.horizontal, 12)
-                                .frame(minHeight: 44)
-                                .background(
-                                    cashRange == range ? Color.accentColor : AppTheme.card,
-                                    in: Capsule()
-                                )
-                                .foregroundStyle(cashRange == range ? Color.white : Color.primary)
                         }
+                    } label: {
+                        Text(range.label)
+                            .font(AppTypography.meta())
+                            .padding(.horizontal, 12)
+                            .frame(minHeight: 44)
+                            .background(
+                                cashRange == range ? AppTheme.accent : AppTheme.card,
+                                in: Capsule()
+                            )
+                            .foregroundStyle(cashRange == range ? Color.white : Color.primary)
+                    }
                         .buttonStyle(.plain)
                     }
                 }
@@ -67,11 +69,13 @@ struct ChartsView: View {
                             x: .value("month", item.monthStart, unit: .month),
                             y: .value("SGD", NSDecimalNumber(decimal: item.total).doubleValue)
                         )
-                        .foregroundStyle(Color.accentColor.gradient)
+                        .foregroundStyle(AppTheme.accent.gradient)
                         .cornerRadius(4)
                     }
                     .chartYAxisLabel("SGD")
                     .frame(height: 200)
+                    .animation(.smooth, value: useFilter)
+                    .animation(.smooth, value: cashRange)
                 }
 
                 chartCard(
@@ -88,10 +92,12 @@ struct ChartsView: View {
                         .cornerRadius(4)
                     }
                     .frame(height: 200)
+                    .animation(.smooth, value: useFilter)
                 }
             }
             .padding(16)
         }
+        .scrollIndicators(.hidden)
         .screenCanvas()
         .navigationTitle("charts")
     }
@@ -108,7 +114,8 @@ struct ChartsView: View {
                     .font(AppTypography.sectionTitle())
                 Text(total, format: .currency(code: "SGD"))
                     .font(.moneyCaption())
-                    .foregroundStyle(emphasizesTotal ? Color.accentColor : AppTheme.inkSecondary)
+                    .foregroundStyle(emphasizesTotal ? AppTheme.accent : AppTheme.inkSecondary)
+                    .contentTransition(.numericText())
             }
             content()
         }
