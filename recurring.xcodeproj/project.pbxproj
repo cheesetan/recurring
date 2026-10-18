@@ -6,8 +6,45 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1D8BF7202F2FC100006237D7 /* RecurringWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D8BF71F2F2FC100006237D7 /* RecurringWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1D8BF7232F2FC100006237D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D8BF6F72F2FBF95006237D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D8BF71E2F2FC100006237D7;
+			remoteInfo = RecurringWidgetExtension;
+		};
+		1D8BF7262F2FC100006237D7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1D8BF6F72F2FBF95006237D7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D8BF6FE2F2FBF95006237D7;
+			remoteInfo = recurring;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1D8BF7212F2FC100006237D7 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1D8BF7202F2FC100006237D7 /* RecurringWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		1D8BF6FF2F2FBF95006237D7 /* recurring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = recurring.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D8BF71F2F2FC100006237D7 /* RecurringWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RecurringWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D8BF7242F2FC100006237D7 /* recurringTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = recurringTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -17,6 +54,13 @@
 				Application/Info.plist,
 			);
 			target = 1D8BF6FE2F2FBF95006237D7 /* recurring */;
+		};
+		1D8BF7272F2FC100006237D7 /* Exceptions for "RecurringWidget" folder in "RecurringWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1D8BF71E2F2FC100006237D7 /* RecurringWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -29,10 +73,42 @@
 			path = recurring;
 			sourceTree = "<group>";
 		};
+		1D8BF7282F2FC100006237D7 /* RecurringCore */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = RecurringCore;
+			sourceTree = "<group>";
+		};
+		1D8BF7292F2FC100006237D7 /* RecurringWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1D8BF7272F2FC100006237D7 /* Exceptions for "RecurringWidget" folder in "RecurringWidgetExtension" target */,
+			);
+			path = RecurringWidget;
+			sourceTree = "<group>";
+		};
+		1D8BF72A2F2FC100006237D7 /* recurringTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = recurringTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		1D8BF6FC2F2FBF95006237D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D8BF71C2F2FC100006237D7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D8BF7222F2FC100006237D7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,6 +122,9 @@
 			isa = PBXGroup;
 			children = (
 				1D8BF7012F2FBF95006237D7 /* recurring */,
+				1D8BF7282F2FC100006237D7 /* RecurringCore */,
+				1D8BF7292F2FC100006237D7 /* RecurringWidget */,
+				1D8BF72A2F2FC100006237D7 /* recurringTests */,
 				1D8BF7002F2FBF95006237D7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +133,8 @@
 			isa = PBXGroup;
 			children = (
 				1D8BF6FF2F2FBF95006237D7 /* recurring.app */,
+				1D8BF71F2F2FC100006237D7 /* RecurringWidgetExtension.appex */,
+				1D8BF7242F2FC100006237D7 /* recurringTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -68,13 +149,16 @@
 				1D8BF6FB2F2FBF95006237D7 /* Sources */,
 				1D8BF6FC2F2FBF95006237D7 /* Frameworks */,
 				1D8BF6FD2F2FBF95006237D7 /* Resources */,
+				1D8BF7212F2FC100006237D7 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				1D8BF7252F2FC100006237D7 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				1D8BF7012F2FBF95006237D7 /* recurring */,
+				1D8BF7282F2FC100006237D7 /* RecurringCore */,
 			);
 			name = recurring;
 			packageProductDependencies = (
@@ -82,6 +166,52 @@
 			productName = recurring;
 			productReference = 1D8BF6FF2F2FBF95006237D7 /* recurring.app */;
 			productType = "com.apple.product-type.application";
+		};
+		1D8BF71E2F2FC100006237D7 /* RecurringWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D8BF72B2F2FC100006237D7 /* Build configuration list for PBXNativeTarget "RecurringWidgetExtension" */;
+			buildPhases = (
+				1D8BF71B2F2FC100006237D7 /* Sources */,
+				1D8BF71C2F2FC100006237D7 /* Frameworks */,
+				1D8BF71D2F2FC100006237D7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1D8BF7282F2FC100006237D7 /* RecurringCore */,
+				1D8BF7292F2FC100006237D7 /* RecurringWidget */,
+			);
+			name = RecurringWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = RecurringWidgetExtension;
+			productReference = 1D8BF71F2F2FC100006237D7 /* RecurringWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		1D8BF7312F2FC100006237D7 /* recurringTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1D8BF72E2F2FC100006237D7 /* Build configuration list for PBXNativeTarget "recurringTests" */;
+			buildPhases = (
+				1D8BF7322F2FC100006237D7 /* Sources */,
+				1D8BF7222F2FC100006237D7 /* Frameworks */,
+				1D8BF7332F2FC100006237D7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1D8BF7342F2FC100006237D7 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				1D8BF72A2F2FC100006237D7 /* recurringTests */,
+			);
+			name = recurringTests;
+			packageProductDependencies = (
+			);
+			productName = recurringTests;
+			productReference = 1D8BF7242F2FC100006237D7 /* recurringTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -95,6 +225,13 @@
 				TargetAttributes = {
 					1D8BF6FE2F2FBF95006237D7 = {
 						CreatedOnToolsVersion = 26.2;
+					};
+					1D8BF71E2F2FC100006237D7 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					1D8BF7312F2FC100006237D7 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 1D8BF6FE2F2FBF95006237D7;
 					};
 				};
 			};
@@ -113,12 +250,28 @@
 			projectRoot = "";
 			targets = (
 				1D8BF6FE2F2FBF95006237D7 /* recurring */,
+				1D8BF71E2F2FC100006237D7 /* RecurringWidgetExtension */,
+				1D8BF7312F2FC100006237D7 /* recurringTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		1D8BF6FD2F2FBF95006237D7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D8BF71D2F2FC100006237D7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D8BF7332F2FC100006237D7 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -135,7 +288,34 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1D8BF71B2F2FC100006237D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1D8BF7322F2FC100006237D7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1D8BF7252F2FC100006237D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D8BF71E2F2FC100006237D7 /* RecurringWidgetExtension */;
+			targetProxy = 1D8BF7232F2FC100006237D7 /* PBXContainerItemProxy */;
+		};
+		1D8BF7342F2FC100006237D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D8BF6FE2F2FBF95006237D7 /* recurring */;
+			targetProxy = 1D8BF7262F2FC100006237D7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1D8BF70E2F2FBF97006237D7 /* Debug */ = {
@@ -146,7 +326,7 @@
 				CODE_SIGN_ENTITLEMENTS = recurring/Application/recurring.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = XL5JK4F896;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = recurring/Application/Info.plist;
@@ -160,15 +340,19 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.tristanchay.recurring;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurring;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -180,7 +364,7 @@
 				CODE_SIGN_ENTITLEMENTS = recurring/Application/recurring.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = XL5JK4F896;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = recurring/Application/Info.plist;
@@ -194,15 +378,19 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = app.tristanchay.recurring;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurring;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -327,6 +515,96 @@
 			};
 			name = Release;
 		};
+		1D8BF72C2F2FC100006237D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RecurringWidget/RecurringWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecurringWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RecurringWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurring.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		1D8BF72D2F2FC100006237D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RecurringWidget/RecurringWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = RecurringWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = RecurringWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurring.widget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		1D8BF72F2F2FC100006237D7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurringTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recurring.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recurring";
+			};
+			name = Debug;
+		};
+		1D8BF7302F2FC100006237D7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3LZLPBXN2N;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tristanchay.recurringTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/recurring.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/recurring";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -344,6 +622,24 @@
 			buildConfigurations = (
 				1D8BF70E2F2FBF97006237D7 /* Debug */,
 				1D8BF70F2F2FBF97006237D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1D8BF72B2F2FC100006237D7 /* Build configuration list for PBXNativeTarget "RecurringWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D8BF72C2F2FC100006237D7 /* Debug */,
+				1D8BF72D2F2FC100006237D7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1D8BF72E2F2FC100006237D7 /* Build configuration list for PBXNativeTarget "recurringTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1D8BF72F2F2FC100006237D7 /* Debug */,
+				1D8BF7302F2FC100006237D7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

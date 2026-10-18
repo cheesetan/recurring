@@ -2,31 +2,57 @@
 //  recurringApp.swift
 //  recurring
 //
-//  Created by Tristan Chay on 2/2/26.
-//
 
-import SwiftUI
 import SwiftData
+import SwiftUI
+import UIKit
 
 @main
 struct recurringApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Subscription.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    let container: ModelContainer
 
+    init() {
+        Self.configureRoundedNavigationBar()
+        if UserDefaults.standard.object(forKey: AppConstants.notificationsEnabledKey) == nil {
+            UserDefaults.standard.set(true, forKey: AppConstants.notificationsEnabledKey)
+        }
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            container = try ModelContainerProvider.makeShared()
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootTabView()
+                .fontDesign(.rounded)
+                .task {
+                    await NotificationScheduler.requestAuthorizationIfNeeded()
+                }
+                .onAppear {
+                    let context = container.mainContext
+                    try? ChargeRecorder.processDueCharges(context: context)
+                    WidgetRefresh.now()
+                    Task { await NotificationScheduler.rescheduleAll(context: context) }
+                }
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(container)
+    }
+
+    private static func configureRoundedNavigationBar() {
+        func rounded(size: CGFloat, weight: UIFont.Weight) -> UIFont {
+            let base = UIFont.systemFont(ofSize: size, weight: weight)
+            guard let descriptor = base.fontDescriptor.withDesign(.rounded) else { return base }
+            return UIFont(descriptor: descriptor, size: size)
+        }
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.titleTextAttributes = [.font: rounded(size: 17, weight: .semibold)]
+        appearance.largeTitleTextAttributes = [.font: rounded(size: 34, weight: .bold)]
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
     }
 }
